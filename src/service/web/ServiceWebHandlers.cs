@@ -1,17 +1,24 @@
 public class ServiceWebHandlers {
 
-    public static Optional<Func<LoggerRequest, LoggerRequest>> Find(string code) {
+    internal static Optional<(Func<LoggerRequest, LoggerRequest>, Optional<Func<LoggerResponse, LoggerResponse>>)> Find(string code) {
         switch (code) {
             case "TestHandler":
-                return Optional<Func<LoggerRequest, LoggerRequest>>.Some(TestHandler);
+                var input = InputTestHandler;
+                var output = Optional<Func<LoggerResponse, LoggerResponse>>.Some(OutputTestHandler);
+                return Optional<(Func<LoggerRequest, LoggerRequest>, Optional<Func<LoggerResponse, LoggerResponse>>)>.Some((input, output));
             default:
-                return Optional<Func<LoggerRequest, LoggerRequest>>.None();
+                return Optional<(Func<LoggerRequest, LoggerRequest>, Optional<Func<LoggerResponse, LoggerResponse>>)>.None();
         }
     }
 
-    public static LoggerRequest TestHandler(LoggerRequest request) {
-        Console.WriteLine("Oh hey!");
+    internal static LoggerRequest InputTestHandler(LoggerRequest request) {
+        Console.WriteLine("Input: Oh hey!");
         return request;
+    }
+
+    internal static LoggerResponse OutputTestHandler(LoggerResponse response) {
+        Console.WriteLine("Output: Oh hey!");
+        return response;
     }
 
 }

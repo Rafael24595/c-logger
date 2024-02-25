@@ -1,6 +1,6 @@
 public class ServiceEvents {
 
-    public static Optional<Func<bool>> find(string code) {
+    internal static Optional<Func<bool>> find(string code) {
         switch (code) {
             case "TestEvent":
                 return Optional<Func<bool>>.Some(TestEvent);
@@ -9,7 +9,7 @@ public class ServiceEvents {
         }
     }
 
-    public static bool TestEvent() {
+    internal static bool TestEvent() {
         Console.WriteLine("Hello event!");
         return true;
     }

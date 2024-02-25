@@ -18,10 +18,6 @@ public class BuilderServiceManagerEvents {
         
         return this;
     }
-    public BuilderServiceManagerEvents SetService(ServiceEvent service) {
-        this.services.Add(service);
-        return this;
-    }
 
     public ServiceManagerEvents Build() {
         return new([.. this.services]);
