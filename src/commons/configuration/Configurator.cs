@@ -25,7 +25,13 @@ public class Configurator {
             }
         }
 
-        return new([.. webHandlers], [.. serviceEvents]);
+        var persistence = config.GetSection("Persistence");
+        var pCode = persistence.GetValue<string>("code");
+        var pConnection = persistence.GetValue<string>("connection");
+        var pDatabase = persistence.GetValue<string>("database");
+        var pCollection = persistence.GetValue<string>("collection");
+
+        return new([.. webHandlers], [.. serviceEvents], new(pCode, pConnection, pDatabase, pCollection));
     }
 
 }

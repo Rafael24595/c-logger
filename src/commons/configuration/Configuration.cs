@@ -1,19 +1,13 @@
 public class Configuration {
 
-    private readonly string[] webHandlers;
-    private readonly (string, int)[] serviceEvents;
+    public readonly string[] webHandlers;
+    public readonly (string, int)[] serviceEvents;
+    public readonly Persistence persistence;
 
-    internal Configuration(string[] webHandlers, (string, int)[] serviceEvents) {
+    internal Configuration(string[] webHandlers, (string, int)[] serviceEvents, Persistence persistence) {
         this.webHandlers = webHandlers;
         this.serviceEvents = serviceEvents;
-    }
-
-    public string[] WebHandlers() {
-        return this.webHandlers;
-    }
-
-    public (string, int)[] ServiceEvents() {
-        return this.serviceEvents;
+        this.persistence = persistence;
     }
     
 }

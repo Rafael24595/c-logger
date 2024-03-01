@@ -1,6 +1,12 @@
 static void start(string[] args) {
     Configuration configuration = Configurator.Build();
 
+    IRepository repository = new RepositoryMySQL(configuration.persistence);
+
+    LogEvent log = new LogEvent("TestService", "001", "TEST", "SELF", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond, "This is a test message");
+    repository.Insert(log);
+    repository.FindAll(log.Service, log.SessionId);
+
     ServiceManagerEvents manager = LoadServiceEvent(configuration);
     manager.Execute();
 
@@ -28,7 +34,7 @@ static WebApplication LoadApp(string[] args) {
 
 static ServiceWeb LoadServiceWeb(Configuration configuration) {
     BuilderServiceWeb serviceBuilder = new BuilderServiceWeb();
-    foreach (var handler in configuration.WebHandlers()) {
+    foreach (var handler in configuration.webHandlers) {
         serviceBuilder.SetHandler(handler);
     }
     return serviceBuilder.Build();
@@ -36,7 +42,7 @@ static ServiceWeb LoadServiceWeb(Configuration configuration) {
 
 static ServiceManagerEvents LoadServiceEvent(Configuration configuration) {
     BuilderServiceManagerEvents serviceBuilder = new BuilderServiceManagerEvents();
-    foreach (var service in configuration.ServiceEvents()) {
+    foreach (var service in configuration.serviceEvents) {
         serviceBuilder.SetService(service.Item1, service.Item2);
     }
     return serviceBuilder.Build();

@@ -1,4 +1,5 @@
 public enum EFieldType {
     INTEGER,
-    STRING
+    STRING,
+    BIGINT
 }
