@@ -77,7 +77,7 @@ public class RepositoryMySQL: IRepository {
 
             while (reader.Read()) {
                 var columnName = reader["Field"];
-                if (columnName != null && !expectedColumns.Contains(columnName?.ToString())) {
+                if (columnName != null && !expectedColumns.Contains(columnName?.ToString() ?? "")) {
                     return false;
                 }
             }
@@ -158,6 +158,8 @@ public class RepositoryMySQL: IRepository {
             using MySqlCommand command = new(SQLQuery.InsertLogEvent(this.collection, log), connection);
             command.ExecuteNonQuery();
 
+            log.Id = (int) command.LastInsertedId;
+
             return Result<LogEvent, LogApiException>.OK(log);
         } catch (Exception e) {
             LogApiException exception = new LogApiException(500, "", e);
@@ -179,7 +181,7 @@ public class RepositoryMySQL: IRepository {
 
         return true;
         }
-        catch (Exception e) {
+        catch (Exception) {
             return false;
         }
     }

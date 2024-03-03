@@ -1,16 +1,9 @@
-public class LogApiException: Exception {
+public class LogApiException(int status, string code, string message) : Exception(message) {
 
-    private readonly long status;
-    private readonly string code;
+    public int Status { get; } = status;
+    public string Code { get; } = code;
 
-    public LogApiException(long status, string code, string message): base(message) {
-        this.status = status;
-        this.code = code;
+    public LogApiException(int status, string code, Exception exception): this(status, code, exception.Message) {
     }
-
-    public LogApiException(long status, string code, Exception exception): base(exception.Message) {
-        this.status = status;
-        this.code = code;
-    }
-
+    
 }

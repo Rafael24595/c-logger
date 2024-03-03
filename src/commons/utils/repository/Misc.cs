@@ -10,7 +10,6 @@ public class Misc {
             if (attribute != null) {
                 FieldAttribute fieldAttribute = (FieldAttribute) attribute;
                 attributes.Add(fieldAttribute);
-                Console.WriteLine($"Field Name: {fieldAttribute.FieldName}, Field Type: {fieldAttribute.FieldType}");
             }
         }
         return attributes;

@@ -58,7 +58,7 @@ public class SQLQuery {
                     value = $"\"{value}\"";
                 }
                 fields.Add(attribute.Item1.FieldName);
-                values.Add(value);
+                values.Add(value ?? "");
             }
         }
 
