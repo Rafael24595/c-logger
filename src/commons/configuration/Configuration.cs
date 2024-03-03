@@ -1,12 +1,12 @@
 public class Configuration {
 
+    public readonly DependencyContainer container;
     public readonly string[] webHandlers;
-    public readonly (string, int)[] serviceEvents;
     public readonly Persistence persistence;
 
-    internal Configuration(string[] webHandlers, (string, int)[] serviceEvents, Persistence persistence) {
+    internal Configuration(DependencyContainer container, string[] webHandlers, Persistence persistence) {
         this.webHandlers = webHandlers;
-        this.serviceEvents = serviceEvents;
+        this.container = container;
         this.persistence = persistence;
     }
     

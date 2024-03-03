@@ -9,15 +9,33 @@ public class Controller {
     public static WebApplication Initialize(WebApplication app, ServiceWeb service) {
         Controller controller = new(service);
 
-        app.MapGet("/hello-world", controller.HelloWolrd)
-            .WithName("GetHelloWorld")
+        app.MapPost("/insert", controller.Insert)
+            .WithName("PostInsert")
+            .WithOpenApi();
+
+        app.MapGet("/find", controller.Find)
+            .WithName("GetFind")
+            .WithOpenApi();
+
+        app.MapGet("/find-all", controller.FindAll)
+            .WithName("GetFindAll")
             .WithOpenApi();
 
         return app;
     }
 
-    private IResult HelloWolrd(HttpRequest request) {
-        this.service.HelloWorld(new());
+    private IResult Insert(HttpRequest request) {
+        this.service.Insert(new());
+        return Results.Ok("Hello World");
+    }
+
+    private IResult Find(HttpRequest request) {
+        this.service.Insert(new());
+        return Results.Ok("Hello World");
+    }
+
+    private IResult FindAll(HttpRequest request) {
+        this.service.Insert(new());
         return Results.Ok("Hello World");
     }
 

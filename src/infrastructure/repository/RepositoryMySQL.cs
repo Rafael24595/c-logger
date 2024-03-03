@@ -2,6 +2,8 @@ using MySql.Data.MySqlClient;
 
 public class RepositoryMySQL: IRepository {
 
+    public const string NAME = "RepositoryMySQL";
+
     private readonly string connection;
     private readonly string database;
     private readonly string collection;
@@ -15,35 +17,32 @@ public class RepositoryMySQL: IRepository {
         this.collection = collection;
     }
     
-    private Optional<MySqlConnection> GetConnection() {
+    private Result<MySqlConnection, LogApiException> GetConnection() {
         MySqlConnection connection = new(this.connection);
         
         try {
             connection.Open();
-            Console.WriteLine("Connection opened successfully!");
 
             if (!DatabaseExists(connection)) {
                 CreateDatabase(connection);
-                Console.WriteLine("Database created successfully!");
             }
 
             connection.ChangeDatabase(this.database);
 
             if (!TableExists(connection)) {
                 CreateTable(connection);
-                Console.WriteLine("Table created successfully!");
             }
 
             if(!TableHasExpectedStructure(connection)) {
-                Console.WriteLine("Table description changed!");
-                return Optional<MySqlConnection>.None();
+                LogApiException exception = new LogApiException(500, "", "Table description changed!");
+                return Result<MySqlConnection, LogApiException>.ERR(exception);
             }
         } catch (Exception e) {
-            Console.WriteLine($"Error: {e.Message}");
-            return Optional<MySqlConnection>.None();
+            LogApiException exception = new LogApiException(500, "", e);
+            return Result<MySqlConnection, LogApiException>.ERR(exception);
         }
 
-        return Optional<MySqlConnection>.Some(connection);
+        return Result<MySqlConnection, LogApiException>.OK(connection);
     }
 
     private bool DatabaseExists(MySqlConnection connection) {
@@ -91,37 +90,40 @@ public class RepositoryMySQL: IRepository {
         }
     }
 
-    public Optional<LogEvent> Find(string id) {
+    public Result<LogEvent, LogApiException> Find(string id) {
         var oConnection = this.GetConnection();
-        if(oConnection.IsNone()) {
-            return Optional<LogEvent>.None();
+        if(oConnection.IsErr()) {
+            Optional<LogApiException> err = oConnection.Err();
+            return Result<LogEvent, LogApiException>.ERR(err.Unwrap());
         }
 
-        using var connection = oConnection.Unwrap();
+        using var connection = oConnection.Ok().Unwrap();
 
         try {
             using MySqlCommand command = new(SQLQuery.Select(this.collection, id), connection);
             using MySqlDataReader reader = command.ExecuteReader();
 
             while (reader.Read()) {
-                Dictionary<string, object> row = this.LogEventAsJson(reader);
-                return Optional<LogEvent>.Some(Misc.LogEventFromJson(row));
+                Dictionary<string, object> row = this.LogEventReaderAsJson(reader);
+                return Result<LogEvent, LogApiException>.OK(Misc.LogEventFromJson(row));
             }
-        }
-        catch (Exception e) {
-            Console.WriteLine(e);
+        } catch (Exception e) {
+            LogApiException exct = new LogApiException(500, "", e);
+            return Result<LogEvent, LogApiException>.ERR(exct);
         }
 
-        return Optional<LogEvent>.None();
+        LogApiException exception = new LogApiException(404, "", "Logs not found.");
+        return Result<LogEvent, LogApiException>.ERR(exception);
     }
 
-    public Optional<List<LogEvent>> FindAll(string service, string session_id) {
+    public Result<List<LogEvent>, LogApiException> FindAll(string service, string session_id) {
         var oConnection = this.GetConnection();
-        if(oConnection.IsNone()) {
-            return Optional<List<LogEvent>>.None();
+        if(oConnection.IsErr()) {
+            Optional<LogApiException> err = oConnection.Err();
+            return Result<List<LogEvent>, LogApiException>.ERR(err.Unwrap());
         }
 
-        using var connection = oConnection.Unwrap();
+        using var connection = oConnection.Ok().Unwrap();
 
         try {
             using MySqlCommand command = new(SQLQuery.SelectWhere(this.collection, service, session_id), connection);
@@ -130,54 +132,63 @@ public class RepositoryMySQL: IRepository {
             List<LogEvent> logs = [];
 
             while (reader.Read()) {
-                Dictionary<string, object> row = this.LogEventAsJson(reader);
+                Dictionary<string, object> row = this.LogEventReaderAsJson(reader);
                 var log = Misc.LogEventFromJson(row);
                 logs.Add(log);
             }
 
-             return Optional<List<LogEvent>>.Some(logs);
+             return Result<List<LogEvent>, LogApiException>.OK(logs);
         }
         catch (Exception e) {
-            Console.WriteLine(e);
+            LogApiException exct = new LogApiException(500, "", e);
+            return Result<List<LogEvent>, LogApiException>.ERR(exct);
         }
-
-        return Optional<List<LogEvent>>.None();
     }
 
-    public Optional<LogEvent> Insert(LogEvent log) {
+    public Result<LogEvent, LogApiException> Insert(LogEvent log) {
         var oConnection = this.GetConnection();
-        if(oConnection.IsNone()) {
-            return Optional<LogEvent>.None();
+        if(oConnection.IsErr()) {
+            Optional<LogApiException> err = oConnection.Err();
+            return Result<LogEvent, LogApiException>.ERR(err.Unwrap());
         }
 
-        using var connection = oConnection.Unwrap();
+        using var connection = oConnection.Ok().Unwrap();
 
-        using MySqlCommand command = new(SQLQuery.InsertLogEvent(this.collection, log), connection);
-        command.ExecuteNonQuery();
+        try {
+            using MySqlCommand command = new(SQLQuery.InsertLogEvent(this.collection, log), connection);
+            command.ExecuteNonQuery();
 
-        return Optional<LogEvent>.Some(log);
+            return Result<LogEvent, LogApiException>.OK(log);
+        } catch (Exception e) {
+            LogApiException exception = new LogApiException(500, "", e);
+            return Result<LogEvent, LogApiException>.ERR(exception);
+        }
     }
 
-    public bool Reset(LogEvent log) {
+    public bool Reset() {
         var oConnection = this.GetConnection();
-        if(oConnection.IsNone()) {
+        if(oConnection.IsErr()) {
             return false;
         }
 
-        using var connection = oConnection.Unwrap();
+        using var connection = oConnection.Ok().Unwrap();
 
+        try {
         using MySqlCommand drop = new($"DROP TABLE {this.collection}", connection);
         drop.ExecuteNonQuery();
 
         return true;
+        }
+        catch (Exception e) {
+            return false;
+        }
     }
 
-     public Dictionary<string, object> LogEventAsJson(MySqlDataReader reader) {
+     public Dictionary<string, object> LogEventReaderAsJson(MySqlDataReader reader) {
         Dictionary<string, object> row = [];
         for (int i = 0; i < reader.FieldCount; i++) {
             string columnName = reader.GetName(i);
             object value = reader.GetValue(i);
-
             row[columnName] = value;
         }
         return row;

@@ -1,5 +1,5 @@
-interface IRepository {
-    Optional<LogEvent> Find(string id);
-    Optional<List<LogEvent>> FindAll(string service, string session_id);
-    Optional<LogEvent> Insert(LogEvent log);
+public interface IRepository {
+    Result<LogEvent, LogApiException> Find(string id);
+    Result<List<LogEvent>, LogApiException> FindAll(string service, string session_id);
+    Result<LogEvent, LogApiException> Insert(LogEvent log);
 }

@@ -1,15 +1,8 @@
 static void start(string[] args) {
     Configuration configuration = Configurator.Build();
 
-    IRepository repository = new RepositoryMySQL(configuration.persistence);
-
-    LogEvent log = new LogEvent("TestService", "001", "TEST", "SELF", DateTime.Now.Ticks / TimeSpan.TicksPerMillisecond, "This is a test message");
-    repository.Insert(log);
-    repository.FindAll(log.Service, log.SessionId);
-
-    ServiceManagerEvents manager = LoadServiceEvent(configuration);
-    manager.Execute();
-
+    Optional<ServiceManagerEvents> _ = LoadServiceManagerEvents(configuration);
+    
     WebApplication app = LoadApp(args);
 
     if (app.Environment.IsDevelopment()) {
@@ -32,18 +25,29 @@ static WebApplication LoadApp(string[] args) {
     return builder.Build();
 }
 
-static ServiceWeb LoadServiceWeb(Configuration configuration) {
-    BuilderServiceWeb serviceBuilder = new BuilderServiceWeb();
-    foreach (var handler in configuration.webHandlers) {
-        serviceBuilder.SetHandler(handler);
+static Optional<ServiceManagerEvents> LoadServiceManagerEvents(Configuration configuration) {
+    Optional<ServiceManagerEvents> manager = configuration.container.GetEvents();
+    if(manager.IsSome()) {
+        manager.Unwrap().Execute();
+    } else {
+        Console.WriteLine("Events couldn't be loaded.");
     }
-    return serviceBuilder.Build();
+
+    return manager;
 }
 
-static ServiceManagerEvents LoadServiceEvent(Configuration configuration) {
-    BuilderServiceManagerEvents serviceBuilder = new BuilderServiceManagerEvents();
-    foreach (var service in configuration.serviceEvents) {
-        serviceBuilder.SetService(service.Item1, service.Item2);
+static ServiceWeb LoadServiceWeb(Configuration configuration) {
+    Optional<IRepository> oRepository = configuration.container.Repository;
+    IRepository repository = new RepositorMemory(configuration.persistence);
+    if(oRepository.IsSome()) {
+        repository = oRepository.Unwrap();
+    } else {
+        Console.WriteLine("User repository couldn't be loaded, memory instance implemented.");
+    }
+
+    BuilderServiceWeb serviceBuilder = new(repository);
+    foreach (var handler in configuration.webHandlers) {
+        serviceBuilder.SetHandler(handler);
     }
     return serviceBuilder.Build();
 }

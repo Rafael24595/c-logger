@@ -1,9 +1,11 @@
 public class BuilderServiceWeb {
 
+    private readonly IRepository repository;
     private List<Func<LoggerRequest, LoggerRequest>> inputHandlers;
     private List<Func<LoggerResponse, LoggerResponse>> outputHandlers;
 
-    public BuilderServiceWeb() {
+    public BuilderServiceWeb(IRepository repository) {
+        this.repository = repository;
         this.inputHandlers = [];
         this.outputHandlers = [];
     } 
@@ -25,7 +27,7 @@ public class BuilderServiceWeb {
     }
 
     public ServiceWeb Build() {
-        return new([.. this.inputHandlers], [.. this.outputHandlers]);
+        return new(repository, [.. this.inputHandlers], [.. this.outputHandlers]);
     }
 
 }
