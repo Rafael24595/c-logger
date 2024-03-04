@@ -5,11 +5,13 @@ public class ServiceWeb {
     private readonly IRepository repository;
     private Func<LoggerRequest, LoggerRequest>[] inputHandlers;
     private Func<LoggerResponse, LoggerResponse>[] outputHandlers;
+    private readonly BufferLogEvent buffer;
 
     internal ServiceWeb( IRepository repository, Func<LoggerRequest, LoggerRequest>[] inputHandlers, Func<LoggerResponse, LoggerResponse>[] outputHandlers) {
         this.repository = repository;
         this.inputHandlers = inputHandlers;
         this.outputHandlers = outputHandlers;
+        this.buffer = new();
     }
 
     public LoggerResponse Insert(LoggerRequest request) {
@@ -30,6 +32,7 @@ public class ServiceWeb {
 
         Result<LogEvent, LogApiException> logResult = this.repository.Insert(log.Unwrap());
         if(logResult.IsErr()) {
+            this.buffer.Insert(log.Unwrap());
             var err = logResult.Err().Unwrap();
             response.Status = err.Status;
             response.Body = err.Message;
