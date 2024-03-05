@@ -7,11 +7,27 @@ public class ServiceWeb {
     private Func<LoggerResponse, LoggerResponse>[] outputHandlers;
     private readonly BufferLogEvent buffer;
 
-    internal ServiceWeb( IRepository repository, Func<LoggerRequest, LoggerRequest>[] inputHandlers, Func<LoggerResponse, LoggerResponse>[] outputHandlers) {
+    internal ServiceWeb(IRepository repository, Func<LoggerRequest, LoggerRequest>[] inputHandlers, Func<LoggerResponse, LoggerResponse>[] outputHandlers) {
         this.repository = repository;
         this.inputHandlers = inputHandlers;
         this.outputHandlers = outputHandlers;
         this.buffer = new();
+        Thread thread = new(this.BufferRecovery);
+        thread.Start();
+    }
+
+    private void BufferRecovery() {
+        while (true) {
+            var log = this.buffer.Take();
+            if(log.IsNone() || !this.repository.Status()) {
+                if(log.IsSome()) {
+                    this.buffer.Insert(log.Unwrap());
+                }
+                Thread.Sleep(10000);
+                continue;
+            }
+            this.Insert(log.Unwrap());
+        }
     }
 
     public LoggerResponse Insert(LoggerRequest request) {
@@ -30,9 +46,15 @@ public class ServiceWeb {
             return this.ExecuteOutputHandlers(response);
         }
 
-        Result<LogEvent, LogApiException> logResult = this.repository.Insert(log.Unwrap());
+        return this.Insert(log.Unwrap());
+    }
+
+    private LoggerResponse Insert(LogEvent log) {
+        LoggerResponse response = new();
+
+        Result<LogEvent, LogApiException> logResult = this.repository.Insert(log);
         if(logResult.IsErr()) {
-            this.buffer.Insert(log.Unwrap());
+            this.buffer.Insert(log);
             var err = logResult.Err().Unwrap();
             response.Status = err.Status;
             response.Body = err.Message;

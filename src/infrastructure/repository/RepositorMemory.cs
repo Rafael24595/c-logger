@@ -21,6 +21,10 @@ public class RepositorMemory: IRepository {
         return Result<List<LogEvent>, LogApiException>.OK(oService[session]);
     }
 
+    public bool Status() {
+        return true;
+    }
+
     public Result<LogEvent, LogApiException> Find(string id) {
         foreach (var services in this.collection) {
             foreach (var sessions in services.Value) {

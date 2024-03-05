@@ -90,6 +90,10 @@ public class RepositoryMySQL: IRepository {
         }
     }
 
+    public bool Status() {
+        return this.GetConnection().IsOk();
+    }
+
     public Result<LogEvent, LogApiException> Find(string id) {
         var oConnection = this.GetConnection();
         if(oConnection.IsErr()) {

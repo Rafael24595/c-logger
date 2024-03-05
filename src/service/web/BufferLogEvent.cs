@@ -8,7 +8,7 @@ public class BufferLogEvent {
     private readonly List<LogEvent> buffer;
 
     public BufferLogEvent() {
-        this.buffer = [];
+        this.buffer = this.ReadJsonFiles();
     }
 
     [MethodImpl(MethodImplOptions.Synchronized)]
@@ -22,7 +22,11 @@ public class BufferLogEvent {
         if(this.buffer.Count < 1) {
             return Optional<LogEvent>.None();
         }
-        return Optional<LogEvent>.Some(this.buffer.First());
+
+        LogEvent log = this.buffer[0];
+        this.buffer.RemoveAt(0); 
+
+        return Optional<LogEvent>.Some(log);
     }
 
     [MethodImpl(MethodImplOptions.Synchronized)]
@@ -38,6 +42,18 @@ public class BufferLogEvent {
             .WritteFile(name, json);
 
         return this;
+    }
+
+    [MethodImpl(MethodImplOptions.Synchronized)]
+    public List<LogEvent> ReadJsonFiles() {
+        List<LogEvent> entities = [];
+        foreach (var jsonFile in Directory.GetFiles(DIRECTORY, "*.json")) {
+            string text = File.ReadAllText(jsonFile);
+            List<LogEvent> items = JsonSerializer.Deserialize<List<LogEvent>>(text) ?? [];
+            entities = [.. entities, .. items];
+            File.Delete(jsonFile);
+        }
+        return entities;
     }
 
     private BufferLogEvent CreateDirectoryIfNotExists() {
