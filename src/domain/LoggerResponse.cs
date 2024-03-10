@@ -20,7 +20,7 @@ public class LoggerResponse {
     public static LoggerResponse From(LoggerResponse logger) {
         return new LoggerResponse(logger.Status, logger.Content, logger.Encoding, logger.Body);
     }
-    public LoggerResponse clone() {
+    public LoggerResponse Clone() {
         return LoggerResponse.From(this);
     }
 

@@ -58,7 +58,6 @@ public class RepositorMemory: IRepository {
             return Result<LogEvent, LogApiException>.ERR(err.Unwrap());
         }
 
-
         var connection = oConnection.Ok().Unwrap();
         log.Id = connection.Count;
         connection.Add(log);

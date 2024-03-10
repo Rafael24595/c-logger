@@ -1,8 +1,8 @@
 public class BuilderServiceWeb {
 
     private readonly IRepository repository;
-    private List<Func<LoggerRequest, LoggerRequest>> inputHandlers;
-    private List<Func<LoggerResponse, LoggerResponse>> outputHandlers;
+    private readonly List<Func<LoggerRequest, LoggerRequest>> inputHandlers;
+    private readonly List<Func<LoggerResponse, LoggerResponse>> outputHandlers;
 
     public BuilderServiceWeb(IRepository repository) {
         this.repository = repository;
@@ -10,18 +10,12 @@ public class BuilderServiceWeb {
         this.outputHandlers = [];
     } 
 
-    public BuilderServiceWeb SetHandler(string code) {
-        var oHandler = ServiceWebHandlers.Find(code);
-        if(oHandler.IsSome()) {
-            var handler = oHandler.Unwrap();
-            var input = handler.Item1;
-            var output = handler.Item2;
-            this.inputHandlers.Add(input);
-            if(output.IsSome()) {
-                this.outputHandlers.Add(output.Unwrap());
-            }
-        } else {
-            Console.WriteLine("Not found: " + code);
+    public BuilderServiceWeb SetHandler((Func<LoggerRequest, LoggerRequest>, Optional<Func<LoggerResponse, LoggerResponse>>) handler) {
+        var input = handler.Item1;
+        var output = handler.Item2;
+        this.inputHandlers.Add(input);
+        if(output.IsSome()) {
+            this.outputHandlers.Add(output.Unwrap());
         }
         return this;
     }

@@ -3,8 +3,8 @@ using System.Text.Json;
 public class ServiceWeb {
 
     private readonly IRepository repository;
-    private Func<LoggerRequest, LoggerRequest>[] inputHandlers;
-    private Func<LoggerResponse, LoggerResponse>[] outputHandlers;
+    private readonly Func<LoggerRequest, LoggerRequest>[] inputHandlers;
+    private readonly Func<LoggerResponse, LoggerResponse>[] outputHandlers;
     private readonly BufferLogEvent buffer;
 
     internal ServiceWeb(IRepository repository, Func<LoggerRequest, LoggerRequest>[] inputHandlers, Func<LoggerResponse, LoggerResponse>[] outputHandlers) {
@@ -118,7 +118,7 @@ public class ServiceWeb {
     }
 
     private LoggerRequest ExecuteInputHandlers(LoggerRequest request) {
-        LoggerRequest aux = request.clone();
+        LoggerRequest aux = request.Clone();
         foreach (var handler in this.inputHandlers) {
             aux = handler(aux);
         }
@@ -126,7 +126,7 @@ public class ServiceWeb {
     }
 
     private LoggerResponse ExecuteOutputHandlers(LoggerResponse response) {
-        LoggerResponse aux = response.clone();
+        LoggerResponse aux = response.Clone();
         foreach (var handler in this.outputHandlers) {
             aux = handler(aux);
         }

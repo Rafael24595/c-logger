@@ -1,7 +1,7 @@
 public class Result<T, K> {
 
-    private Optional<T> ok;
-    private Optional<K> err;
+    private readonly Optional<T> ok;
+    private readonly Optional<K> err;
 
     private Result(T ok, K err) {
         this.ok = Optional<T>.Some(ok);

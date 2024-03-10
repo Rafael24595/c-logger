@@ -1,6 +1,6 @@
 public class Optional<T> {
 
-    private T? element;
+    private readonly T? element;
 
     public Optional() {
     }

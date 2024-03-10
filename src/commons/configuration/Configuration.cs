@@ -1,11 +1,11 @@
 public class Configuration {
 
     public readonly DependencyContainer container;
-    public readonly string[] webHandlers;
+    public readonly IModule[] modules;
     public readonly Persistence persistence;
 
-    internal Configuration(DependencyContainer container, string[] webHandlers, Persistence persistence) {
-        this.webHandlers = webHandlers;
+    internal Configuration(DependencyContainer container, IModule[] modules, Persistence persistence) {
+        this.modules = modules;
         this.container = container;
         this.persistence = persistence;
     }

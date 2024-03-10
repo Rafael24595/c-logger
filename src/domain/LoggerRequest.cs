@@ -10,9 +10,9 @@ public class LoggerRequest {
                          Dictionary<string, List<string>> query, Dictionary<string, string> param, 
                          string body) {
         this.path = path;
-        this.headers = headers ?? new Dictionary<string, List<string>>();
-        this.query = query ?? new Dictionary<string, List<string>>();
-        this.param = param ?? new Dictionary<string, string>();
+        this.headers = headers ?? [];
+        this.query = query ?? [];
+        this.param = param ?? [];
         this.Body = body;
     }
 
@@ -23,7 +23,7 @@ public class LoggerRequest {
                                  logger.Body);
     }
     
-    public LoggerRequest clone() {
+    public LoggerRequest Clone() {
         return LoggerRequest.From(this);
     }
 

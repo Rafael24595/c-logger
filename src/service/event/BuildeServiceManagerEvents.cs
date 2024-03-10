@@ -7,7 +7,7 @@ public class BuilderServiceManagerEvents {
     } 
 
     public BuilderServiceManagerEvents SetService(string code, int delay) {
-        var serviceEvent = ServiceEvents.find(code);
+        var serviceEvent = ServiceEvents.Find(code);
         
         if(serviceEvent.IsSome()) {
             ServiceEvent service = new(serviceEvent.Unwrap(), delay);

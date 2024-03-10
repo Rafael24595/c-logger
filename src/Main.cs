@@ -3,20 +3,19 @@ static void start(string[] args) {
 
     Optional<ServiceManagerEvents> _ = LoadServiceManagerEvents(configuration);
     
-    WebApplication app = LoadApp(args);
+    WebApplication app = LoadWeb(args);
 
     if (app.Environment.IsDevelopment()) {
         app.UseSwagger();
         app.UseSwaggerUI();
     }
-
-    ServiceWeb service = LoadServiceWeb(configuration);
-    app = Controller.Initialize(app, service);
+    
+    app = LoadApp(app, configuration);
 
     app.Run();
 }
 
-static WebApplication LoadApp(string[] args) {
+static WebApplication LoadWeb(string[] args) {
     WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
     builder.Services.AddEndpointsApiExplorer();
@@ -36,7 +35,7 @@ static Optional<ServiceManagerEvents> LoadServiceManagerEvents(Configuration con
     return manager;
 }
 
-static ServiceWeb LoadServiceWeb(Configuration configuration) {
+static WebApplication LoadApp(WebApplication app, Configuration configuration) {
     Optional<IRepository> oRepository = configuration.container.Repository;
     IRepository repository = new RepositorMemory(configuration.persistence);
     if(oRepository.IsSome()) {
@@ -46,10 +45,13 @@ static ServiceWeb LoadServiceWeb(Configuration configuration) {
     }
 
     BuilderServiceWeb serviceBuilder = new(repository);
-    foreach (var handler in configuration.webHandlers) {
-        serviceBuilder.SetHandler(handler);
+    foreach (var module in configuration.modules) {
+        module.Initialize(app, serviceBuilder);
     }
-    return serviceBuilder.Build();
+
+    app = Controller.Initialize(app, serviceBuilder.Build());
+
+    return app;
 }
 
 start(args);

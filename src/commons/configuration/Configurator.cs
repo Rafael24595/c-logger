@@ -8,21 +8,37 @@ public class Configurator {
             .Build()
             .GetSection("AppConfig");
 
-        List<string> webHandlers = [];
-        foreach (var item in config.GetSection("WebHandlers").GetChildren()) {
-            if(item.Value != null) {
-                webHandlers.Add(item.Value);
-                Console.WriteLine(item.Value);
-            }
-        }
-
+        List<IModule> modules = LoadModules(config);
         Persistence persistence = LoadPersistence(config);
         Optional<IRepository> repository = RepositoryDictionary.Find(persistence);
         ServiceManagerEvents events = LoadServiceEvent(config);
 
         DependencyContainer container = LoadDependencyContainer(events, repository);
 
-        return new(container, [.. webHandlers], persistence);
+        return new(container, [.. modules], persistence);
+    }
+
+    private static List<IModule> LoadModules(IConfigurationSection config) {
+        List<IModule> modules = [];
+         foreach (var item in config.GetSection("Modules").GetChildren()) {
+            var active = item.GetValue<bool>("active");
+            if(active) {
+                var code = item.GetValue<string>("code") ?? "";
+                var module = LoadModule(code, item);
+                if(module.IsSome()) {
+                    modules.Add(module.Unwrap());
+                }
+            }
+        }
+        return modules;
+    }
+
+    private static Optional<IModule> LoadModule(string code, IConfigurationSection config) {
+        var arguments = config.GetSection("arguments");
+        return code switch {
+            RustAuthMain.NAME => Optional<IModule>.Some(new RustAuthMain(arguments)),
+            _ => Optional<IModule>.None(),
+        };
     }
 
      private static Persistence LoadPersistence(IConfigurationSection config) {
@@ -45,7 +61,7 @@ public class Configurator {
     }
 
     private static ServiceManagerEvents LoadServiceEvent(IConfigurationSection config) {
-        BuilderServiceManagerEvents serviceBuilder = new BuilderServiceManagerEvents();
+        BuilderServiceManagerEvents serviceBuilder = new();
 
         foreach (var item in config.GetSection("ServiceEvents").GetChildren()) {
             var code = item.GetValue<string>("code");
