@@ -75,7 +75,7 @@ public class Controller {
         return new(path, headers, query, param, body);
     }
 
-    private IResult LoggerRequestToIResult( LoggerResponse response) {
+    private IResult LoggerRequestToIResult(LoggerResponse response) {
         return Results.Content(response.Body, response.Content, response.Encoding, response.Status);
     }
 

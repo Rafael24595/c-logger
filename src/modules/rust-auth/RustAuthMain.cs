@@ -4,18 +4,31 @@ public class RustAuthMain: IModule {
 
     private readonly IConfigurationSection args;
 
+    private Optional<string> token;
+    private Optional<RustAuthHandler> Handler;
+
     public RustAuthMain(IConfigurationSection args) {
         this.args = args;
+        this.token = Optional<string>.None();
+        this.Handler = Optional<RustAuthHandler>.None();
     }
 
     public Optional<LogConfigException> Initialize(WebApplication app, BuilderServiceWeb serviceBuilder) {
+        var token = this.Suscribe();
+        if(token.IsErr()) {
+            return token.Err();
+        }
+
+        this.token = token.Ok();
+
         ControllerRustAuth.Initialize(app);
         var rHandler = InitializeHandler();
         if(rHandler.IsErr()) {
             return rHandler.Err();
         }
 
-        var handler = rHandler.Ok().Unwrap();
+        this.Handler = rHandler.Ok();
+        var handler = this.Handler.Unwrap();
 
         var input = handler.InputFromAesGcmHandler;
         var output = Optional<Func<LoggerResponse, LoggerResponse>>.Some(handler.OutputFromAesGcmHandler);
@@ -40,6 +53,10 @@ public class RustAuthMain: IModule {
 
         RustAuthHandler handler = new(manager.Unwrap());
         return Result<RustAuthHandler, LogConfigException>.OK(handler);
+    }
+
+    private Result<string, LogConfigException> Suscribe() {
+        return Result<string, LogConfigException>.OK("TODO: Get token.");
     }
 
 }
