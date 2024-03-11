@@ -3,12 +3,13 @@ public class RustAuthMain: IModule {
     public const string NAME = "RustAuth";
 
     private readonly IConfigurationSection args;
-
+    private readonly RustAuthResolver resolver;
     private Optional<string> token;
     private Optional<RustAuthHandler> Handler;
 
     public RustAuthMain(IConfigurationSection args) {
         this.args = args;
+        this.resolver = new RustAuthResolver(this.args.GetValue<string>("host") ?? "");
         this.token = Optional<string>.None();
         this.Handler = Optional<RustAuthHandler>.None();
     }
@@ -42,13 +43,13 @@ public class RustAuthMain: IModule {
         var manager = DictionaryManagerSymmetric.Find(code, this.args);
         if(manager.IsNone()) {
             var exception = new LogConfigException("", "Symmetric manager not found.");
-            Result<RustAuthHandler, LogConfigException>.ERR(exception);
+            return Result<RustAuthHandler, LogConfigException>.ERR(exception);
         }
 
         var status = manager.Unwrap().Status();
         if(status.IsSome()) {
             var exception = new LogConfigException("", status.Unwrap());
-            Result<RustAuthHandler, LogConfigException>.ERR(exception);
+            return Result<RustAuthHandler, LogConfigException>.ERR(exception);
         }
 
         RustAuthHandler handler = new(manager.Unwrap());
@@ -56,6 +57,14 @@ public class RustAuthMain: IModule {
     }
 
     private Result<string, LogConfigException> Suscribe() {
+        var rPubkey = Task.Run(this.resolver.PubKey).Result;
+        var pubkey = rPubkey.Ok().Unwrap();
+        var manager = DictionaryManagerAsymmetric.Find(pubkey.module);
+        if(manager.IsNone()) {
+            var exception = new LogConfigException("", "Asymmetric manager not found.");
+            return Result<string, LogConfigException>.ERR(exception);
+        }
+        var request = new SuscribeRequest();
         return Result<string, LogConfigException>.OK("TODO: Get token.");
     }
 
