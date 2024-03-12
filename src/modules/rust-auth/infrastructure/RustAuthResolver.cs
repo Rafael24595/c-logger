@@ -34,9 +34,9 @@ class RustAuthResolver {
     public async Task<Result<SuscribeResponse, LogApiException>> Suscribe(string request) {
         using HttpClient client = new();
 
-        StringContent body = new(request, Encoding.UTF8, "text/plain");
+        StringContent body = new(request, Encoding.UTF8, "application/json");
 
-        HttpResponseMessage response = await client.PostAsync($"{this.host}/nodekey", body);
+        HttpResponseMessage response = await client.PostAsync($"{this.host}/subscribe", body);
 
         if (!response.IsSuccessStatusCode) {
             var exception = new LogApiException(500, "", "Could not get node public key.");

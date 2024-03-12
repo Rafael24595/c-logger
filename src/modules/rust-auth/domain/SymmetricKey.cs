@@ -1,8 +1,15 @@
 public class SymmetricKey {
 
-    public string Module { get; set; }
-    public string Key { get; set; }
-    public string Format { get; set; }
-    public long Expires { get; set; }
+    public string module { get; set; }
+    public string key { get; set; }
+    public string format { get; set; }
+    public long expires { get; set; }
     
+    public SymmetricKey(string module, string key, string format, long expires) {
+        this.module = module;
+        this.key = key;
+        this.format = format;
+        this.expires = expires;
+    }
+
 }

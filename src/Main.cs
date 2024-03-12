@@ -51,6 +51,8 @@ static WebApplication LoadApp(WebApplication app, Configuration configuration) {
 
     app = Controller.Initialize(app, serviceBuilder.Build());
 
+    app.Urls.Add(configuration.host);
+
     return app;
 }
 

@@ -3,7 +3,7 @@ using System.Text;
 
 class ManagerAesGcm: IManagerSymmetric {
 
-    public const string NAME = "ManagerAesGcm";
+    public const string NAME = "AES_GCM";
 
     private readonly int size;
     private readonly byte[] tag;
@@ -15,8 +15,10 @@ class ManagerAesGcm: IManagerSymmetric {
         this.key = this.RandomKey(this.KeySizeFromSize(size));
     }
 
-    public string Key() {
-        return this.ByteArrayToHexString(this.key);
+    public SymmetricKey Key() {
+        var key = this.ByteArrayToHexString(this.key);
+        var timestamp = DateTimeOffset.Now.ToUnixTimeMilliseconds() + (15 * 60 * 1000);
+        return new SymmetricKey(NAME, key, this.size.ToString(), timestamp);
     }
 
     public Optional<string> Status() {

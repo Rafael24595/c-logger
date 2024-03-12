@@ -8,6 +8,8 @@ public class Configurator {
             .Build()
             .GetSection("AppConfig");
 
+        string host = config.GetValue<string>("Host") ?? "";
+        string service = config.GetValue<string>("Service") ?? "";
         List<IModule> modules = LoadModules(config);
         Persistence persistence = LoadPersistence(config);
         Optional<IRepository> repository = RepositoryDictionary.Find(persistence);
@@ -15,7 +17,7 @@ public class Configurator {
 
         DependencyContainer container = LoadDependencyContainer(events, repository);
 
-        return new(container, [.. modules], persistence);
+        return Configuration.Initialize(service, host, container, [.. modules], persistence);
     }
 
     private static List<IModule> LoadModules(IConfigurationSection config) {
