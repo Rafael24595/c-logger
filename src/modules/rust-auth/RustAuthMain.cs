@@ -100,13 +100,15 @@ public class RustAuthMain: IModule {
         string json = JsonSerializer.Serialize(request);
         var encJson = manager.Unwrap().Encrypt(pubkey, json);
 
-        var rToken = Task.Run(() => this.resolver.Suscribe(encJson)).Result;
+        var payload = new SuscribePayload(encJson);
+
+        var rToken = Task.Run(() => this.resolver.Suscribe(payload)).Result;
         if(rToken.IsErr()) {
             var exception = new LogConfigException("", rToken.Err().Unwrap().Message);
             return Result<string, LogConfigException>.ERR(exception);
         }
 
-        return Result<string, LogConfigException>.OK(rToken.Ok().Unwrap().payload);
+        return Result<string, LogConfigException>.OK(rToken.Ok().Unwrap());
     }
 
 }

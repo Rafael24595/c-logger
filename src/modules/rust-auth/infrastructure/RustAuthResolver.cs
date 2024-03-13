@@ -31,28 +31,22 @@ class RustAuthResolver {
         return Result<PubKey, LogApiException>.OK(pubkey);
     }
 
-    public async Task<Result<SuscribeResponse, LogApiException>> Suscribe(string request) {
+    public async Task<Result<string, LogApiException>> Suscribe(SuscribePayload request) {
         using HttpClient client = new();
 
-        StringContent body = new(request, Encoding.UTF8, "application/json");
+        string json = JsonSerializer.Serialize(request);
+        StringContent body = new(json, Encoding.UTF8, "application/json");
 
         HttpResponseMessage response = await client.PostAsync($"{this.host}/subscribe", body);
 
         if (!response.IsSuccessStatusCode) {
             var exception = new LogApiException(500, "", "Could not get node public key.");
-            return Result<SuscribeResponse, LogApiException>.ERR(exception);
+            return Result<string, LogApiException>.ERR(exception);
         }
 
-        string content = await response.Content.ReadAsStringAsync();
-        SuscribeResponse token = JsonSerializer.Deserialize<SuscribeResponse>(content);
+        string token = await response.Content.ReadAsStringAsync();
 
-        if (token == null) {
-            var exception = new LogApiException(422, "", "Could not get node public key.");
-            return Result<SuscribeResponse, LogApiException>.ERR(exception);
-        }
-
-        return Result<SuscribeResponse, LogApiException>.OK(token);
-
+        return Result<string, LogApiException>.OK(token);
     }
 
 }
