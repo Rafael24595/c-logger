@@ -34,13 +34,15 @@ public class ServiceWeb {
         request = this.ExecuteInputHandlers(request);
         LoggerResponse response = new();
 
-        Optional<LogEvent> log = LogEvent.From(request.Body);
-        if(log.IsNone()) {
+        Optional<LogEvent> oLog = LogEvent.From(request.Body);
+        if(oLog.IsNone()) {
             response.Status = 400;
             return this.ExecuteOutputHandlers(response);
         }
 
-        return this.Insert(log.Unwrap());
+        var log = Configuration.UpdateEventMisc(oLog.Unwrap());
+
+        return this.Insert(log);
     }
 
     private LoggerResponse Insert(LogEvent log) {

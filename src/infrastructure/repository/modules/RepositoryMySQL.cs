@@ -171,7 +171,8 @@ public class RepositoryMySQL: IRepository {
         }
     }
 
-    public bool Reset() {
+    //TODO-FUTURE: Test only, remove.
+    private bool Reset() {
         var oConnection = this.GetConnection();
         if(oConnection.IsErr()) {
             return false;

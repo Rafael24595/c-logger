@@ -23,6 +23,17 @@ public class LogEvent {
     [Field("message", EFieldType.STRING)]
     public string Message { get; set; }
 
+
+    [Field("inserted_by", EFieldType.STRING, 50)]
+    public string InsertedBy { get; set; }
+
+    [Field("inserted_on", EFieldType.STRING, 50)]
+    public string InsertedOn { get; set; }
+
+    [Field("inserted_at", EFieldType.BIGINT)]
+    public long InsertedAt { get; set; }
+
+
     public LogEvent() {
         this.Id = 0;
         this.Service = "";
@@ -31,9 +42,12 @@ public class LogEvent {
         this.Family = "";
         this.Timestamp = 0;
         this.Message = "";
+        this.InsertedBy = "";
+        this.InsertedOn = "";
+        this.InsertedAt = 0;
     }
 
-    public LogEvent(string service, string sessionId, string category, string family, long timestamp, string message) {
+    public LogEvent(string service, string sessionId, string category, string family, long timestamp, string message, string insertedBy, string insertedOn, long insertedAt) {
         this.Id = 0;
         this.Service = service;
         this.SessionId = sessionId;
@@ -41,6 +55,9 @@ public class LogEvent {
         this.Family = family;
         this.Timestamp = timestamp;
         this.Message = message;
+        this.InsertedBy = insertedBy;
+        this.InsertedOn = insertedOn;
+        this.InsertedAt = insertedAt;
     }
 
     public static Optional<LogEvent> From(string log) {

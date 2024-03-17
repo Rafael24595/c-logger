@@ -72,13 +72,15 @@ public class KafkaResolver {
                     }
 
                     var logSerialized = message.Message.Value;
-                    var log = LogEvent.From(logSerialized);
-                    if(log.IsNone()) {
+                    var oLog = LogEvent.From(logSerialized);
+                    if(oLog.IsNone()) {
                         Console.WriteLine($"Log cannot be deserialized: {logSerialized}");
                         continue;
                     }
 
-                    repository.Unwrap().Insert(log.Unwrap());
+                    var log = Configuration.UpdateEventMisc(oLog.Unwrap());
+
+                    repository.Unwrap().Insert(log);
                 } catch (ConsumeException e) {
                     Console.WriteLine($"Error consuming message: {e.Error.Reason}");
                 }

@@ -10,6 +10,7 @@ public class Configurator {
 
         string host = config.GetValue<string>("Host") ?? "";
         string service = config.GetValue<string>("Service") ?? "";
+        string session = Guid.NewGuid().ToString();
         List<IModule> modules = LoadModules(config);
         List<ICloseableModule> closeableModules = LoadCloseableModules(config);
         Persistence persistence = LoadPersistence(config);
@@ -17,7 +18,7 @@ public class Configurator {
 
         DependencyContainer container = LoadDependencyContainer(repository);
 
-        return Configuration.Initialize(service, host, container, [.. modules], [.. closeableModules], persistence);
+        return Configuration.Initialize(service, session, host, container, [.. modules], [.. closeableModules], persistence);
     }
 
     private static List<IModule> LoadModules(IConfigurationSection config) {
