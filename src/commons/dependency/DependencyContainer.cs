@@ -1,11 +1,9 @@
 public class DependencyContainer {
 
     public Optional<IRepository> Repository;
-    public Optional<ServiceManagerEvents> Events;
 
     public DependencyContainer() {
         this.Repository = Optional<IRepository>.None();
-        this.Events = Optional<ServiceManagerEvents>.None();
     }
 
     public Optional<IRepository> GetRepository() {
@@ -19,15 +17,6 @@ public class DependencyContainer {
 
      public DependencyContainer SetRepository(Optional<IRepository> repository) {
         this.Repository = repository;
-        return this;
-    }
-
-    public Optional<ServiceManagerEvents> GetEvents() {
-        return this.Events;
-    }
-
-    public DependencyContainer SetEvents(ServiceManagerEvents events) {
-        this.Events = Optional<ServiceManagerEvents>.Some(events);
         return this;
     }
 
