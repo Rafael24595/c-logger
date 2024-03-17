@@ -5,7 +5,7 @@ public class Optional<T> {
     public Optional() {
     }
 
-    public Optional(T element) {
+    private Optional(T? element) {
         this.element = element;
     }
 
@@ -14,6 +14,10 @@ public class Optional<T> {
     }
 
     public static Optional<T> Some(T element) {
+        return new(element);
+    }
+
+    public static Optional<T> SomeNullable(T? element) {
         return new(element);
     }
 

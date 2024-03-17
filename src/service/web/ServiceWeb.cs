@@ -34,13 +34,7 @@ public class ServiceWeb {
         request = this.ExecuteInputHandlers(request);
         LoggerResponse response = new();
 
-        Optional<LogEvent> log;
-        try {         
-            log = Optional<LogEvent>.Some(JsonSerializer.Deserialize<LogEvent>(request.Body));   
-        } catch (Exception) {
-            log = Optional<LogEvent>.None();
-        }
-
+        Optional<LogEvent> log = LogEvent.From(request.Body);
         if(log.IsNone()) {
             response.Status = 400;
             return this.ExecuteOutputHandlers(response);

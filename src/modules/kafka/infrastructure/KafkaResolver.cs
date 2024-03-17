@@ -71,9 +71,10 @@ public class KafkaResolver {
                         return Optional<LogConfigException>.Some(exception);
                     }
 
-                    var log = this.DeserializeLog(message.Message.Value);
+                    var logSerialized = message.Message.Value;
+                    var log = LogEvent.From(logSerialized);
                     if(log.IsNone()) {
-                        Console.WriteLine($"Message cannot be deserialized: {message.Message.Value}");
+                        Console.WriteLine($"Log cannot be deserialized: {logSerialized}");
                         continue;
                     }
 
@@ -87,14 +88,6 @@ public class KafkaResolver {
         }
 
         return Optional<LogConfigException>.None();
-    }
-
-    private Optional<LogEvent> DeserializeLog(string message) {
-        try {         
-            return Optional<LogEvent>.Some(JsonSerializer.Deserialize<LogEvent>(message));   
-        } catch (Exception) {
-            return Optional<LogEvent>.None();
-        }
     }
 
     public Result<EStatus, LogConfigException> Close() {

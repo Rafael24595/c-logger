@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 public class LogEvent {
 
     [Field("id", EFieldKey.IS_KEY, EFieldType.INTEGER)]
@@ -31,7 +33,7 @@ public class LogEvent {
         this.Message = "";
     }
 
-    public LogEvent( string service, string sessionId, string category, string family, long timestamp, string message) {
+    public LogEvent(string service, string sessionId, string category, string family, long timestamp, string message) {
         this.Id = 0;
         this.Service = service;
         this.SessionId = sessionId;
@@ -39,6 +41,14 @@ public class LogEvent {
         this.Family = family;
         this.Timestamp = timestamp;
         this.Message = message;
+    }
+
+    public static Optional<LogEvent> From(string log) {
+        try {         
+            return Optional<LogEvent>.SomeNullable(JsonSerializer.Deserialize<LogEvent>(log));   
+        } catch (Exception) {
+            return Optional<LogEvent>.None();
+        }
     }
 
 }
